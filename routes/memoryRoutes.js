@@ -1,13 +1,11 @@
-
 const express = require("express");
 const multer = require("multer");
 const { google } = require("googleapis");
-const fs = require("fs");
-const path = require("path");
+const streamifier = require("streamifier");
 const { readMemory, writeMemory } = require("../utils/fileHandler");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+const upload = multer({ storage: multer.memoryStorage() });
 
 router.get("/memory/:topic", async (req, res) => {
     const topic = req.params.topic;
@@ -40,6 +38,7 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
             q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder'`,
             fields: "files(id)",
         });
+
         let folderId = folderRes.data.files[0]?.id;
         if (!folderId) {
             const folder = await drive.files.create({
@@ -49,10 +48,14 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
             folderId = folder.data.id;
         }
 
-        const fileMeta = { name: req.file.originalname, parents: [folderId] };
+        const fileMeta = {
+            name: req.file.originalname,
+            parents: [folderId],
+        };
+
         const media = {
             mimeType: req.file.mimetype,
-            body: fs.createReadStream(req.file.path),
+            body: streamifier.createReadStream(req.file.buffer),
         };
 
         const file = await drive.files.create({
@@ -61,10 +64,12 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
             fields: "id",
         });
 
-        fs.promises.unlink(req.file.path); // usuń plik tymczasowy
         res.json({ message: "✅ Przesłano plik na Google Drive", fileId: file.data.id });
     } catch (err) {
-        res.status(500).json({ error: "❌ Błąd wysyłania do Google Drive", details: err.message });
+        res.status(500).json({
+            error: "❌ Błąd wysyłania do Google Drive",
+            details: err.message,
+        });
     }
 });
 
