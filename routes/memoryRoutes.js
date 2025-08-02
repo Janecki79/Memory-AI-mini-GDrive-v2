@@ -1,11 +1,12 @@
 const express = require("express");
 const multer = require("multer");
 const { google } = require("googleapis");
-const streamifier = require("streamifier");
+const fs = require("fs");
+const path = require("path");
 const { readMemory, writeMemory } = require("../utils/fileHandler");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ dest: "uploads/" });
 
 router.get("/memory/:topic", async (req, res) => {
     const topic = req.params.topic;
@@ -55,7 +56,7 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
 
         const media = {
             mimeType: req.file.mimetype,
-            body: streamifier.createReadStream(req.file.buffer),
+            body: fs.createReadStream(req.file.path),
         };
 
         const file = await drive.files.create({
@@ -64,12 +65,10 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
             fields: "id",
         });
 
+        await fs.promises.unlink(req.file.path); // usuwa plik tymczasowy
         res.json({ message: "✅ Przesłano plik na Google Drive", fileId: file.data.id });
     } catch (err) {
-        res.status(500).json({
-            error: "❌ Błąd wysyłania do Google Drive",
-            details: err.message,
-        });
+        res.status(500).json({ error: "❌ Błąd wysyłania do Google Drive", details: err.message });
     }
 });
 
