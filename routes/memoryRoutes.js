@@ -1,10 +1,12 @@
 const express = require("express");
 const multer = require("multer");
 const { google } = require("googleapis");
+const fs = require("fs");
+const path = require("path");
 const { readMemory, writeMemory } = require("../utils/fileHandler");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({ dest: "uploads/" });
 
 router.get("/memory/:topic", async (req, res) => {
     const topic = req.params.topic;
@@ -29,20 +31,26 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
             keyFile: "client_secret.json",
             scopes: ["https://www.googleapis.com/auth/drive.file"],
         });
-
         const authClient = await auth.getClient();
         const drive = google.drive({ version: "v3", auth: authClient });
 
         const folderName = "Dane-Memory AI mini";
+        let folderId;
+
         const folderRes = await drive.files.list({
-            q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder'`,
+            q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
             fields: "files(id)",
+            spaces: "drive",
         });
 
-        let folderId = folderRes.data.files[0]?.id;
-        if (!folderId) {
+        if (folderRes.data.files.length > 0) {
+            folderId = folderRes.data.files[0].id;
+        } else {
             const folder = await drive.files.create({
-                resource: { name: folderName, mimeType: "application/vnd.google-apps.folder" },
+                resource: {
+                    name: folderName,
+                    mimeType: "application/vnd.google-apps.folder",
+                },
                 fields: "id",
             });
             folderId = folder.data.id;
@@ -55,25 +63,19 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
 
         const media = {
             mimeType: req.file.mimetype,
-            body: Buffer.from(req.file.buffer),
+            body: fs.createReadStream(req.file.path),
         };
 
-        const stream = require("streamifier");
-        const file = await drive.files.create({
+        const response = await drive.files.create({
             resource: fileMeta,
-            media: {
-                mimeType: req.file.mimetype,
-                body: stream.createReadStream(req.file.buffer),
-            },
+            media,
             fields: "id",
         });
 
-        res.json({ message: "✅ Przesłano plik na Google Drive", fileId: file.data.id });
+        fs.unlink(req.file.path, () => {});
+        res.json({ message: "✅ Przesłano plik do Google Drive", fileId: response.data.id });
     } catch (err) {
-        res.status(500).json({
-            error: "❌ Błąd wysyłania do Google Drive",
-            details: err.message,
-        });
+        res.status(500).json({ error: "❌ Błąd wysyłania do Google Drive", details: err.message });
     }
 });
 
