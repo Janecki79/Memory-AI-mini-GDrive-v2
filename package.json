@@ -12,5 +12,7 @@
     "cors": "^2.8.5",
     "multer": "1.4.4",
     "googleapis": "^118.0.0"
+    "streamifier": "^0.1.1"
+
   }
 }
