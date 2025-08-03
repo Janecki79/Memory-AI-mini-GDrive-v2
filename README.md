@@ -9,7 +9,7 @@ Serwer Express.js do zapisywania notatek i przesyłania plików z GPTs do Google
 - `GET /memory/:topic` – odczytuje notatki
 - `POST /upload-gdrive` – przesyła plik do folderu "Dane-Memory AI mini" na Google Drive
 
-## Wdrożenie na Render
+## Wdrożenie na Render.
 
 1. Wgraj projekt na GitHub.
 2. Utwórz Web Service na Render.com.
