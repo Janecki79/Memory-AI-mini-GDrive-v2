@@ -23,7 +23,7 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
 
         const credentials = JSON.parse(clientSecretContent);
 
-   const clientSecretContent = process.env.GOOGLE_CLIENT_SECRET_JSON; // TO JEST NAJWAŻNIEJSZA ZMIANA
+   const clientSecretContent = process.env.CLIENT_SECRET_JSON; // TO JEST NAJWAŻNIEJSZA ZMIANA
 
 if (!clientSecretContent) {
     throw new Error("Google client secret is not configured.");
