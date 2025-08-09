@@ -3,6 +3,11 @@
 
 Serwer Express.js do zapisywania notatek i przesyłania plików z GPTs do Google Drive.
 
+## Uruchomienie
+
+1. Zainstaluj zależności: `npm install`
+2. Uruchom serwer: `npm start`
+
 ## Endpointy
 
 - `POST /memory/:topic` – zapisuje notatkę do tematu
