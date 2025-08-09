@@ -1,5 +1,7 @@
 
 const express = require("express");
+
+// Enable Cross-Origin Resource Sharing
 const cors = require("cors");
 const fs = require("fs");
 const path = require("path");
@@ -8,7 +10,7 @@ const memoryRoutes = require("./routes/memoryRoutes");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors()); // allow cross-origin requests
 app.use(express.json());
 
 const dataDir = path.join(__dirname, "data");
