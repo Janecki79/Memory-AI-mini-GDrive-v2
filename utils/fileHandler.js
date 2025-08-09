@@ -13,8 +13,7 @@ const readMemory = async (topic) => {
 
 const writeMemory = async (topic, text) => {
     const filePath = path.join(__dirname, "..", "data", `${topic}.txt`);
-    const line = `[${new Date().toISOString()}] ${text}
-`;
+    const line = `[${new Date().toISOString()}] ${text}\n`;
     await fs.appendFile(filePath, line);
 };
 
