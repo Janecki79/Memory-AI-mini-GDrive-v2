@@ -1,4 +1,3 @@
-// W routes/memoryRoutes.js
 const express = require("express");
 const multer = require("multer");
 const { google } = require("googleapis");
@@ -13,9 +12,7 @@ const upload = multer({ dest: "uploads/" });
 
 router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
     try {
-        // Zakładając, że Render udostępnia zawartość client_secret.json
-        // jako zmienną środowiskową, np. GOOGLE_CLIENT_SECRET_JSON
-        const clientSecretContent = process.env.GOOGLE_CLIENT_SECRET_JSON;
+        const clientSecretContent = process.env.CLIENT_SECRET_JSON;
 
         if (!clientSecretContent) {
             throw new Error("Google client secret is not configured.");
@@ -23,22 +20,28 @@ router.post("/upload-gdrive", upload.single("file"), async (req, res) => {
 
         const credentials = JSON.parse(clientSecretContent);
 
-   const clientSecretContent = process.env.CLIENT_SECRET_JSON; // TO JEST NAJWAŻNIEJSZA ZMIANA
+        const auth = new google.auth.GoogleAuth({
+            credentials,
+            scopes: ["https://www.googleapis.com/auth/drive.file"],
+        });
+        const authClient = await auth.getClient();
+        const drive = google.drive({ version: "v3", auth: authClient });
 
-if (!clientSecretContent) {
-    throw new Error("Google client secret is not configured.");
-}
+        const fileMetadata = { name: req.file.originalname };
+        const media = {
+            mimeType: req.file.mimetype,
+            body: fs.createReadStream(req.file.path),
+        };
 
-const credentials = JSON.parse(clientSecretContent);
+        const response = await drive.files.create({
+            requestBody: fileMetadata,
+            media,
+            fields: "id, name", 
+        });
 
-const auth = new google.auth.GoogleAuth({
-    credentials: credentials, // ZAUWAŻ ZMIANĘ Z "keyFile" NA "credentials"
-    scopes: ["https://www.googleapis.com/auth/drive.file"],
-});
-const authClient = await auth.getClient();
-const drive = google.drive({ version: "v3", auth: authClient });
+        fs.unlinkSync(req.file.path);
 
-        // ... (reszta logiki przesyłania)
+        res.json({ success: true, file: response.data });
     } catch (err) {
         res.status(500).json({ error: "❌ Błąd wysyłania do Google Drive", details: err.message });
     }
