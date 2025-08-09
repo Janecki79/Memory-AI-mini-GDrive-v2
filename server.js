@@ -1,31 +1,26 @@
-
-const express = require("express");
-
-// Enable Cross-Origin Resource Sharing
-const cors = require("cors");
-const fs = require("fs");
-const path = require("path");
-const memoryRoutes = require("./routes/memoryRoutes");
+// server.js
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(cors()); // allow cross-origin requests
+// middleware
+app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const dataDir = path.join(__dirname, "data");
-if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
-}
-const uploadsDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
+// status/health
+app.get('/status', (req, res) => {
+  res.json({ status: 'ok', uptime: process.uptime() });
+});
 
-app.use("/", memoryRoutes);
-app.get("/status", (req, res) => res.json({ status: "Działa!" }));
+// router pamięci
+const memoryRoutes = require('./routes/memoryRoutes');
+app.use('/memory', memoryRoutes);
 
-app.use("/.well-known/ai-plugin.json", express.static(".well-known/ai-plugin.json"));
-app.use("/openapi.yaml", express.static("openapi.yaml"));
-
-app.listen(PORT, () => console.log("Serwer działa na porcie " + PORT));
+// start
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
