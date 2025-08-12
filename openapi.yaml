@@ -34,24 +34,60 @@ paths:
             schema:
               type: object
               properties:
-                newText:
+                text:
                   type: string
       responses:
         '200':
           description: Notatka zapisana
-  /upload-gdrive:
+  /memory/sync-gdrive:
     post:
-      summary: Prześlij plik na Google Drive
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                file:
-                  type: string
-                  format: binary
+      summary: Synchronizuj lokalne pliki do Google Drive
       responses:
         '200':
-          description: Plik przesłany
+          description: Lista przesłanych plików
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  uploaded:
+                    type: array
+                    items:
+                      type: string
+  /memory/list-gdrive:
+    get:
+      summary: Wyświetl pliki na Google Drive
+      responses:
+        '200':
+          description: Lista plików
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  files:
+                    type: array
+                    items:
+                      type: object
+  /memory/download-gdrive/{file}:
+    get:
+      summary: Pobierz plik tekstowy z Google Drive
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Treść pliku
+          content:
+            text/plain:
+              schema:
+                type: string
+        '404':
+          description: Plik nie znaleziony

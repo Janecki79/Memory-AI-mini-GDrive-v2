@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs/promises');
 const fssync = require('fs');
 const multer = require('multer');
+const gdrive = require('../utils/googleDrive');
 
 const router = express.Router();
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -44,50 +45,6 @@ async function writeMemoryLocal(topic, text) {
   return { ok: true, bytes: Buffer.byteLength(line) };
 }
 
-/* ===== Opcjonalna integracja z Google Drive (bezpieczna, domyślnie off) =====
-   Włącz przez: GDRIVE_ENABLED=1 i ustaw CLIENT_SECRET_JSON (czysty JSON lub base64).
-   Jeśli nie ustawisz – kod będzie działał tylko lokalnie (bez błędów).
-*/
-let driveSingleton = null;
-async function getDriveOptional() {
-  if (process.env.GDRIVE_ENABLED !== '1') return null; // wyłączone
-  if (driveSingleton) return driveSingleton;
-
-  // Lazy import, żeby nie wymagać googleapis gdy wył.
-  const { google } = await import('googleapis');
-
-  // Pobierz JSON z ENV (czysty lub base64) albo z pliku client_secret.json
-  let jsonStr = process.env.CLIENT_SECRET_JSON || '';
-  if (jsonStr) {
-    try {
-      const maybe = Buffer.from(jsonStr, 'base64').toString('utf8');
-      if (maybe.trim().startsWith('{')) jsonStr = maybe;
-    } catch (_) {}
-  }
-  let creds;
-  if (jsonStr) {
-    creds = JSON.parse(jsonStr);
-  } else if (fssync.existsSync(path.join(process.cwd(), 'client_secret.json'))) {
-    creds = JSON.parse(
-      await fs.readFile(path.join(process.cwd(), 'client_secret.json'), 'utf8')
-    );
-  } else {
-    // Brak credów – wracamy do trybu lokalnego
-    return null;
-  }
-
-  const c = creds.installed || creds.web;
-  const oauth2Client = new google.auth.OAuth2(
-    c.client_id,
-    c.client_secret,
-    Array.isArray(c.redirect_uris) ? c.redirect_uris[0] : c.redirect_uris
-  );
-
-  // Uwaga: bez tokenów użytkownika Drive w trybie OAuth nie zapisze.
-  // Tu zostawiamy tylko odczyt publiczny / future use.
-  driveSingleton = google.drive({ version: 'v3', auth: oauth2Client });
-  return driveSingleton;
-}
 /* ========================================================================== */
 
 /** GET /memory/:topic -> treść pliku */
@@ -129,6 +86,48 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('upload error:', err);
     res.status(500).json({ error: 'upload-failed', details: String(err.message || err) });
+  }
+});
+
+// ======== Google Drive integration ========
+
+router.post('/sync-gdrive', async (req, res) => {
+  try {
+    await ensureDataDir();
+    const files = await fs.readdir(DATA_DIR);
+    const uploaded = [];
+    for (const file of files) {
+      const full = path.join(DATA_DIR, file);
+      if (fssync.statSync(full).isFile()) {
+        await gdrive.uploadOrUpdateFile(full);
+        uploaded.push(file);
+      }
+    }
+    res.json({ ok: true, uploaded });
+  } catch (err) {
+    console.error('sync error:', err);
+    res.status(500).json({ error: 'sync-failed', details: String(err.message || err) });
+  }
+});
+
+router.get('/list-gdrive', async (req, res) => {
+  try {
+    const files = await gdrive.listFiles();
+    res.json({ ok: true, files });
+  } catch (err) {
+    console.error('list error:', err);
+    res.status(500).json({ error: 'list-failed', details: String(err.message || err) });
+  }
+});
+
+router.get('/download-gdrive/:file', async (req, res) => {
+  try {
+    const content = await gdrive.downloadText(req.params.file);
+    if (content == null) return res.status(404).json({ error: 'not-found' });
+    res.type('text/plain').send(content);
+  } catch (err) {
+    console.error('download error:', err);
+    res.status(500).json({ error: 'download-failed', details: String(err.message || err) });
   }
 });
 
