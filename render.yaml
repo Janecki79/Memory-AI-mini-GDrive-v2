@@ -5,3 +5,12 @@ services:
     buildCommand: "npm ci"
     startCommand: "npm start"
     plan: free
+    envVars:
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REFRESH_TOKEN
+        sync: false
+      - key: DRIVE_FOLDER_ID
+        sync: false
