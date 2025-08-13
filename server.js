@@ -10,6 +10,11 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// OpenAPI spec
+app.get('/.well-known/openapi.yaml', (req, res) => {
+  res.sendFile(path.join(__dirname, 'openapi.yaml'));
+});
+
 // status/health
 app.get('/status', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
