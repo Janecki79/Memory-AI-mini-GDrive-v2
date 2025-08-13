@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Memory AI Panel</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    form { margin-bottom: 2em; }
+    label { display: block; margin-top: 0.5em; }
+  </style>
+</head>
+<body>
+  <h1>Panel</h1>
+
+  <div>
+    <label>Adres serwera: <input type="text" id="server" placeholder="http://localhost:3000" /></label>
+    <label>API Key: <input type="text" id="apikey" /></label>
+  </div>
+
+  <h2>POST /memory/:topic</h2>
+  <form id="memory-form">
+    <label>Topic: <input type="text" name="topic" required /></label>
+    <label>Text: <textarea name="text" required></textarea></label>
+    <button type="submit">Wyślij</button>
+  </form>
+
+  <h2>POST /memory/upload</h2>
+  <form id="upload-form">
+    <label>Plik: <input type="file" name="file" required /></label>
+    <button type="submit">Wyślij</button>
+  </form>
+
+  <h2>POST /upload-gdrive</h2>
+  <form id="gdrive-form">
+    <label>Plik: <input type="file" name="file" required /></label>
+    <button type="submit">Wyślij</button>
+  </form>
+
+  <script>
+    const serverInput = document.getElementById('server');
+    const apiInput = document.getElementById('apikey');
+    if (!serverInput.value) serverInput.value = window.location.origin;
+
+    function authHeader() {
+      const key = apiInput.value.trim();
+      return key ? { 'Authorization': 'Bearer ' + key } : {};
+    }
+
+    document.getElementById('memory-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const topic = e.target.topic.value.trim();
+      const text = e.target.text.value;
+      const url = `${serverInput.value}/memory/${encodeURIComponent(topic)}`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...authHeader() },
+        body: JSON.stringify({ text })
+      });
+      alert(await res.text());
+    });
+
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const url = `${serverInput.value}/memory/upload`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: authHeader(),
+        body: formData
+      });
+      alert(await res.text());
+    });
+
+    document.getElementById('gdrive-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const url = `${serverInput.value}/upload-gdrive`;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: authHeader(),
+        body: formData
+      });
+      alert(await res.text());
+    });
+  </script>
+</body>
+</html>
