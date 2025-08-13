@@ -1,4 +1,3 @@
-
 openapi: 3.0.1
 info:
   title: Memory AI Mini API
@@ -6,10 +5,35 @@ info:
   version: '1.0'
 servers:
   - url: https://twoja-domena.onrender.com
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - BearerAuth: []
 paths:
+  /status:
+    get:
+      summary: Status serwera
+      security: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
   /memory/{topic}:
     get:
       summary: Pobierz pamięć dla tematu
+      security:
+        - BearerAuth: []
       parameters:
         - name: topic
           in: path
@@ -19,8 +43,14 @@ paths:
       responses:
         '200':
           description: Zawartość pamięci
+          content:
+            text/plain:
+              schema:
+                type: string
     post:
       summary: Zapisz nową notatkę
+      security:
+        - BearerAuth: []
       parameters:
         - name: topic
           in: path
@@ -34,14 +64,34 @@ paths:
             schema:
               type: object
               properties:
-                newText:
+                text:
                   type: string
       responses:
         '200':
           description: Notatka zapisana
+  /memory/upload:
+    post:
+      summary: Prześlij plik do pamięci lokalnej
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Plik zapisany
   /upload-gdrive:
     post:
       summary: Prześlij plik na Google Drive
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
