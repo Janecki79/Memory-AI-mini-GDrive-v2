@@ -1,0 +1,35 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  BASE_URL: ${{ secrets.BASE_URL || 'https://memory-ai-mini-gdrive-v2.onrender.com' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Render deploy
+        run: curl -fsS -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+      - name: Wait for deployment
+        run: |
+          for i in {1..5}; do
+            echo "poll $i"
+            if curl -fsS "$BASE_URL/status" >/dev/null 2>&1; then
+              break
+            fi
+            sleep 5
+          done
+      - name: Smoke tests
+        run: |
+          bash scripts/smoke.sh "$BASE_URL" "${{ secrets.API_KEY }}" | tee smoke.log
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-log
+          path: smoke.log
