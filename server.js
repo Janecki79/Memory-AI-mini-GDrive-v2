@@ -15,6 +15,11 @@ app.get('/status', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
+// prosty panel HTML
+app.get('/panel', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'views', 'panel.html'));
+});
+
 // router pamięci
 const memoryRoutes = require('./routes/memoryRoutes');
 app.use('/memory', memoryRoutes);
