@@ -9,6 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(
+  '/.well-known',
+  express.static(path.join(process.cwd(), 'public', '.well-known'))
+);
+app.get('/.well-known/openapi.yaml', (_req, res) => {
+  res.type('text/yaml');
+  res.sendFile(
+    path.join(process.cwd(), 'public', '.well-known', 'openapi.yaml')
+  );
+});
 
 // status/health
 app.get('/status', (req, res) => {
