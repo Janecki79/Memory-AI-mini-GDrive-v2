@@ -1,0 +1,57 @@
+
+openapi: 3.0.1
+info:
+  title: Memory AI Mini API
+  description: API do zapisu i odczytu danych oraz przesyłania plików do Google Drive.
+  version: '1.0'
+servers:
+  - url: https://twoja-domena.onrender.com
+paths:
+  /memory/{topic}:
+    get:
+      summary: Pobierz pamięć dla tematu
+      parameters:
+        - name: topic
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Zawartość pamięci
+    post:
+      summary: Zapisz nową notatkę
+      parameters:
+        - name: topic
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                newText:
+                  type: string
+      responses:
+        '200':
+          description: Notatka zapisana
+  /upload-gdrive:
+    post:
+      summary: Prześlij plik na Google Drive
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Plik przesłany
