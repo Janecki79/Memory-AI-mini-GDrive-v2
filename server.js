@@ -19,6 +19,10 @@ app.get('/status', (req, res) => {
 const memoryRoutes = require('./routes/memoryRoutes');
 app.use('/memory', memoryRoutes);
 
+app.get('/panel', (_req, res) =>
+  res.sendFile(path.join(process.cwd(), 'views', 'panel.html'))
+);
+
 // start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
