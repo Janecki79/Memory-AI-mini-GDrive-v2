@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Memory Panel</title>
+</head>
+<body>
+  <h1>Memory Panel</h1>
+
+  <section>
+    <h2>JSON POST to /memory/:topic</h2>
+    <form id="jsonForm">
+      <label>Topic: <input type="text" id="topic" required /></label><br />
+      <label>Text:<br /><textarea id="text" required></textarea></label><br />
+      <button type="submit">Send</button>
+    </form>
+    <pre id="jsonResult"></pre>
+  </section>
+
+  <section>
+    <h2>Upload file to /memory/upload</h2>
+    <form action="/memory/upload" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Upload file to /upload-gdrive</h2>
+    <form action="/upload-gdrive" method="post" enctype="multipart/form-data">
+      <input type="file" name="file" required />
+      <button type="submit">Upload</button>
+    </form>
+  </section>
+
+  <script>
+    document.getElementById('jsonForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const topic = document.getElementById('topic').value.trim();
+      const text = document.getElementById('text').value.trim();
+      const res = await fetch('/memory/' + encodeURIComponent(topic), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      const out = await res.text();
+      document.getElementById('jsonResult').textContent = out;
+    });
+  </script>
+</body>
+</html>
