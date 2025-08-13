@@ -5,6 +5,18 @@ const path = require('path');
 
 const app = express();
 
+// OpenAPI spec
+app.get('/.well-known/openapi.yaml', (_req, res) => {
+  res.type('text/yaml');
+  res.sendFile(path.join(process.cwd(), 'openapi.yaml'));
+});
+
+// optional shorter path
+app.get('/openapi.yaml', (_req, res) => {
+  res.type('text/yaml');
+  res.sendFile(path.join(process.cwd(), 'openapi.yaml'));
+});
+
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -22,5 +34,6 @@ app.use('/memory', memoryRoutes);
 // start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
+  console.log('[api] OpenAPI served at /.well-known/openapi.yaml');
   console.log(`Server listening on ${PORT}`);
 });
