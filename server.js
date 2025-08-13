@@ -15,6 +15,9 @@ app.get('/status', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
+// API key auth middleware
+app.use(require('./middleware/authApiKey'));
+
 // router pamięci
 const memoryRoutes = require('./routes/memoryRoutes');
 app.use('/memory', memoryRoutes);
