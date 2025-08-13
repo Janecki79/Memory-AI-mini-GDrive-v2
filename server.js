@@ -19,6 +19,10 @@ app.get('/status', (req, res) => {
 const memoryRoutes = require('./routes/memoryRoutes');
 app.use('/memory', memoryRoutes);
 
+// drive upload
+const driveRoutes = require('./routes/driveRoutes');
+app.use('/drive', driveRoutes);
+
 // start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
