@@ -7,6 +7,12 @@ info:
 servers:
   - url: https://twoja-domena.onrender.com
 paths:
+  /status:
+    get:
+      summary: Sprawdź status serwera
+      responses:
+        '200':
+          description: Status serwera
   /memory/{topic}:
     get:
       summary: Pobierz pamięć dla tematu
@@ -39,6 +45,22 @@ paths:
       responses:
         '200':
           description: Notatka zapisana
+  /memory/upload:
+    post:
+      summary: Prześlij plik do lokalnej pamięci
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Plik zapisany
   /upload-gdrive:
     post:
       summary: Prześlij plik na Google Drive
