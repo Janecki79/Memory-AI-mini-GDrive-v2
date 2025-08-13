@@ -22,5 +22,6 @@ app.use('/memory', memoryRoutes);
 // start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
+  console.log('[api] OpenAPI served at /.well-known/openapi.yaml');
   console.log(`Server listening on ${PORT}`);
 });
