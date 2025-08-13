@@ -22,3 +22,21 @@ Serwer Express.js do zapisywania notatek i przesyłania plików z GPTs do Google
 4. Dodaj `client_secret.json` i `token.json` jako **Secret Files**.
 5. Kliknij Deploy.
 
+## CI/CD
+
+Automatyczne wdrożenie na Render z prostymi smoke testami.
+
+### Sekrety GitHub
+
+W repozytorium ustaw sekrety (Settings → Secrets and variables → Actions):
+
+```
+RENDER_DEPLOY_HOOK = <Render Deploy Hook URL>
+BASE_URL           = https://memory-ai-mini-gdrive-v2.onrender.com
+(opcjonalnie) API_KEY = <twój klucz, jeśli włączony>
+```
+
+### Ręczne uruchomienie
+
+Przejdź do zakładki **Actions**, wybierz workflow **CI/CD** i kliknij **Run workflow**.
+
