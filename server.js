@@ -2,6 +2,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 
@@ -12,7 +13,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // status/health
 app.get('/status', (req, res) => {
-  res.json({ status: 'ok', uptime: process.uptime() });
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    hasPanel: fs.existsSync(path.join(process.cwd(), 'views', 'panel.html')),
+    hasOpenAPI: fs.existsSync(path.join(process.cwd(), 'public', '.well-known', 'openapi.yaml')),
+    version: process.env.npm_package_version,
+  });
 });
 
 // router pamięci
