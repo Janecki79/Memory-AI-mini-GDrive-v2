@@ -6,39 +6,88 @@ info:
   version: '1.0'
 servers:
   - url: https://twoja-domena.onrender.com
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - BearerAuth: []
 paths:
+  /status:
+    get:
+      summary: Status serwera
+      security: []
+      responses:
+        '200':
+          description: Informacje o statusie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
   /memory/{topic}:
+    parameters:
+      - name: topic
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       summary: Pobierz pamięć dla tematu
-      parameters:
-        - name: topic
-          in: path
-          required: true
-          schema:
-            type: string
       responses:
         '200':
           description: Zawartość pamięci
+          content:
+            text/plain:
+              schema:
+                type: string
     post:
       summary: Zapisz nową notatkę
-      parameters:
-        - name: topic
-          in: path
-          required: true
-          schema:
-            type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - text
               properties:
-                newText:
+                text:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - text
+              properties:
+                text:
                   type: string
       responses:
         '200':
           description: Notatka zapisana
+  /memory/upload:
+    post:
+      summary: Prześlij plik do pamięci
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Plik przesłany
   /upload-gdrive:
     post:
       summary: Prześlij plik na Google Drive
@@ -48,6 +97,8 @@ paths:
           multipart/form-data:
             schema:
               type: object
+              required:
+                - file
               properties:
                 file:
                   type: string
