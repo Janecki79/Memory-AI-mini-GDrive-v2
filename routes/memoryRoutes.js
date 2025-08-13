@@ -89,6 +89,21 @@ async function getDriveOptional() {
   return driveSingleton;
 }
 /* ========================================================================== */
+/** POST /memory/upload (form-data: file) -> zapisz plik do data/ */
+router.post('/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'file-required' });
+
+    await ensureDataDir();
+    const destPath = path.join(DATA_DIR, req.file.originalname || req.file.filename);
+    await fs.rename(req.file.path, destPath);
+
+    res.json({ ok: true, stored: path.basename(destPath) });
+  } catch (err) {
+    console.error('upload error:', err);
+    res.status(500).json({ error: 'upload-failed', details: String(err.message || err) });
+  }
+});
 
 /** GET /memory/:topic -> treść pliku */
 router.get('/:topic', async (req, res) => {
@@ -113,22 +128,6 @@ router.post('/:topic', express.urlencoded({ extended: true }), express.json(), a
   } catch (err) {
     console.error('write error:', err);
     res.status(500).json({ error: 'write-failed', details: String(err.message || err) });
-  }
-});
-
-/** POST /memory/upload (form-data: file) -> zapisz plik do data/ */
-router.post('/upload', upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'file-required' });
-
-    await ensureDataDir();
-    const destPath = path.join(DATA_DIR, req.file.originalname || req.file.filename);
-    await fs.rename(req.file.path, destPath);
-
-    res.json({ ok: true, stored: path.basename(destPath) });
-  } catch (err) {
-    console.error('upload error:', err);
-    res.status(500).json({ error: 'upload-failed', details: String(err.message || err) });
   }
 });
 
