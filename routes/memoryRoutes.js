@@ -132,4 +132,5 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+router.getDriveOptional = getDriveOptional;
 module.exports = router;
