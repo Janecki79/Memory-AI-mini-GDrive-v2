@@ -9,10 +9,16 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(require('./middleware/authApiKey'));
 
 // status/health
 app.get('/status', (req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
+});
+
+// prosty panel HTML
+app.get('/panel', (req, res) => {
+  res.sendFile(path.join(process.cwd(), 'views', 'panel.html'));
 });
 
 // router pamięci
