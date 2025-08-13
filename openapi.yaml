@@ -55,3 +55,11 @@ paths:
       responses:
         '200':
           description: Plik przesłany
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+security:
+  - ApiKeyAuth: []
