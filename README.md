@@ -22,3 +22,15 @@ Serwer Express.js do zapisywania notatek i przesyłania plików z GPTs do Google
 4. Dodaj `client_secret.json` i `token.json` jako **Secret Files**.
 5. Kliknij Deploy.
 
+## Upload quick test
+
+PowerShell:
+```powershell
+pwsh ./scripts/upload-test.ps1 -Base https://<your-app>.onrender.com -File "C:\\Users\\<you>\\OneDrive\\Desktop\\test.txt"
+```
+
+curl (bash):
+```bash
+curl -F "file=@./test.txt" https://<your-app>.onrender.com/memory/upload
+```
+
