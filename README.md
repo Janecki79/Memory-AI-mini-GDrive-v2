@@ -10,9 +10,11 @@ Serwer Express.js do zapisywania notatek i przesyłania plików z GPTs do Google
 
 ## Endpointy
 
-- `POST /memory/:topic` – zapisuje notatkę do tematu
+- `GET /status` – prosty status serwera
+- `POST /memory/:topic` – zapisuje notatkę `{ "text": "..." }`
 - `GET /memory/:topic` – odczytuje notatki
-- `POST /upload-gdrive` – przesyła plik do folderu "Dane-Memory AI mini" na Google Drive
+- `POST /memory/upload` – wysyła plik do lokalnego katalogu danych (multipart/form-data)
+- `POST /upload-gdrive` – przesyła plik do folderu "Dane-Memory AI mini" na Google Drive (multipart/form-data)
 
 ## Deploy na Render
 
