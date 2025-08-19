@@ -6,7 +6,24 @@ info:
   version: '1.0'
 servers:
   - url: https://twoja-domena.onrender.com
+security:
+  - bearerAuth: []
 paths:
+  /status:
+    get:
+      summary: Sprawdź status serwera
+      responses:
+        '200':
+          description: Status serwera
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  uptime:
+                    type: number
   /memory/{topic}:
     get:
       summary: Pobierz pamięć dla tematu
@@ -39,6 +56,22 @@ paths:
       responses:
         '200':
           description: Notatka zapisana
+  /memory/upload:
+    post:
+      summary: Prześlij plik do pamięci
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Plik przesłany
   /upload-gdrive:
     post:
       summary: Prześlij plik na Google Drive
@@ -55,3 +88,9 @@ paths:
       responses:
         '200':
           description: Plik przesłany
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
